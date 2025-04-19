@@ -109,12 +109,13 @@ def compute_grpo_loss(model, prompt_ids, prompt_mask, generated_responses, gt_id
     gt_embeddings = get_sequence_embeddings(model, gt_ids, gt_mask) # (batch_size, hidden_dim)
 
     all_rewards = []
-    for i in range(num_generations):
-        gen_ids_i = generated_responses[:, i, :] # (batch_size, full_gen_len)
-        gen_mask_i = gen_attention_mask[:, i, :] # (batch_size, full_gen_len)
-        gen_embeddings_i = get_sequence_embeddings(model, gen_ids_i, gen_mask_i) # (batch_size, hidden_dim)
-        rewards_i = F.cosine_similarity(gen_embeddings_i, gt_embeddings, dim=1) # (batch_size,)
-        all_rewards.append(rewards_i)
+    with torch.no_grad():
+        for i in range(num_generations):
+            gen_ids_i = generated_responses[:, i, :] # (batch_size, full_gen_len)
+            gen_mask_i = gen_attention_mask[:, i, :] # (batch_size, full_gen_len)
+            gen_embeddings_i = get_sequence_embeddings(model, gen_ids_i, gen_mask_i) # (batch_size, hidden_dim)
+            rewards_i = F.cosine_similarity(gen_embeddings_i, gt_embeddings, dim=1) # (batch_size,)
+            all_rewards.append(rewards_i)
 
     # Stack rewards: (batch_size, num_generations)
     rewards = torch.stack(all_rewards, dim=1)
@@ -294,7 +295,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
 
     # --- Dataset Preparation (Modified for GRPO) ---
-    dataset = load_dataset("bespokelabs/bespoke-manim", split="train")[:10]
+    dataset = load_dataset("bespokelabs/bespoke-manim", split="train").select(range(10))
 
     # Simple check for required columns
     if 'question' not in dataset.column_names or 'python_code' not in dataset.column_names:
@@ -394,7 +395,7 @@ if __name__ == "__main__":
 
     train_sampler = InterruptableDistributedSampler(tokenized_dataset)
 
-    batch_size = 2 # Adjust based on GPU memory (GRPO is memory intensive)
+    batch_size = 1 # Adjust based on GPU memory (GRPO is memory intensive)
     dataloader = DataLoader(
         tokenized_dataset,
         batch_size=batch_size,
