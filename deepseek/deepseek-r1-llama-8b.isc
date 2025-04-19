@@ -3,7 +3,6 @@ experiment_name = "deepseek-r1-llama-8b"
 gpus = 48
 compute_mode = "burst"
 dataset_id_list = ["255087c3-046c-421c-8fe3-6e333f14892a"]
-input_artifact_id_list = ["249c60bf-ef1f-469a-a9f5-5cddbfa51fae"]
 command = '''
 source /root/.deepseek/bin/activate && 
 torchrun --nnodes=$NNODES --nproc-per-node=$N_PROC 
