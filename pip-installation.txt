@@ -1,0 +1,2 @@
+pip install -r llama2/llama-recipes/requirements.txt
+pip install -r llama2/llama-recipes/dev_requirements.txt

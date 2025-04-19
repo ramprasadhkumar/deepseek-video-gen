@@ -165,17 +165,27 @@ if __name__ == "__main__":
     steps_per_epoch = len(dataloader)
     # print("-------STEPS PER EPOCH-------", steps_per_epoch)
     best_loss = float("inf")
-
+    start_epoch = 0
+    
     # load checkpoint if found
     try:
-        output_directory = os.environ["CHECKPOINT_ARTIFACT_PATH"]
+        output_directory = os.environ.get("CHECKPOINT_ARTIFACT_PATH", "/shared/artifacts/karthik-local-artifact-path")
+        print("-------OUTPUT DIRECTORY-------", output_directory)
     except KeyError as error:
         print("Must set env var CHECKPOINT_ARTIFACT_PATH so we know where to save checkpoints!")
         exit(1)
     saver = AtomicDirectory(output_directory=output_directory, is_master=rank==0)
 
     latest_symlink_file_path = os.path.join(output_directory, saver.symlink_name)
+    check_existence_path = '/shared/artifacts/94240af3-544a-49d1-842a-5f022ac8193e/checkpoints'
+    print("-------CHECK EXISTENCE PATH-------", check_existence_path)
+    if os.path.exists(check_existence_path):
+        print("-------CHECK EXISTENCE PATH EXISTS-------")
+    else:
+        print("-------CHECK EXISTENCE PATH DOES NOT EXIST-------")
+    print("-------LATEST SYMLINK FILE PATH-------", latest_symlink_file_path)
     if os.path.islink(latest_symlink_file_path):
+        print("-------LATEST SYMLINK FILE PATH EXISTS-------")
         latest_checkpoint_path = os.readlink(latest_symlink_file_path)
 
         state_dict = { "app": AppState(model, optimizer)}
@@ -189,11 +199,79 @@ if __name__ == "__main__":
 
     state_dict = { "app": AppState(model, optimizer) }
 
-    # training
+    """
+    # --- Start Checkpoint Loading Logic ---
+    try:
+        # Assuming CHECKPOINT_ARTIFACT_PATH points to the PARENT directory
+        # containing the 'AtomicDirectory.latest_checkpoint' symlink and checkpoint folders
+        # Example: /mnt/checkpoints/
+        # output_directory = os.environ["CHECKPOINT_ARTIFACT_PATH"]
+        # latest_symlink_file_path = os.path.join("/shared/artifacts/94240af3-544a-49d1-842a-5f022ac8193e/checkpoints", "AtomicDirectory.latest_checkpoint")
+        # print("-------LATEST SYMLINK FILE PATH-------", latest_symlink_file_path)
+        latest_checkpoint_path = "/shared/artifacts/94240af3-544a-49d1-842a-5f022ac8193e/checkpoints/AtomicDirectory_checkpoint_10"
+        if os.path.exists(latest_checkpoint_path):
+            print("-------LATEST CHECKPOINT FILE PATH EXISTS-------")
+            # Read the symlink to get the actual checkpoint directory path
+            # Example: /mnt/checkpoints/AtomicDirectory_checkpoint_7
+            # latest_checkpoint_path = os.readlink(latest_symlink_file_path)
+            # if not os.path.isabs(latest_checkpoint_path):
+            #      # If the symlink is relative, resolve it relative to the symlink's directory
+            #      latest_checkpoint_path = os.path.join(os.path.dirname(latest_symlink_file_path), latest_checkpoint_path)
+
+
+            print(f"Rank {rank}: Found checkpoint symlink pointing to: {latest_checkpoint_path}")
+
+            # 1. Load FSDP sharded state (model and optimizer)
+            # The state_dict keys ("model", "optim") must match the keys used during saving.
+            # dcp.load expects the actual objects (model, optimizer) as values.
+            state_dict_to_load = {"model": model, "optim": optimizer}
+            storage_reader = dcp.FileSystemReader(latest_checkpoint_path)
+
+            dcp.load(
+                state_dict=state_dict_to_load,
+                storage_reader=storage_reader,
+            )
+            print(f"Rank {rank}: Loaded FSDP model and optimizer state from {latest_checkpoint_path}")
+
+            # 2. Load custom training state (sampler, epoch, loss, etc.)
+            # This file was likely saved only by rank 0, but all ranks need to load it
+            # to potentially get the epoch and restore their sampler state.
+            train_state_path = os.path.join(latest_checkpoint_path, "train_state.pt")
+            if os.path.exists(train_state_path):
+                 # Map location ensures the state is loaded onto the correct device for each rank
+                 map_location = {'cuda:%d' % 0: 'cuda:%d' % local_device} # Map state saved on device 0 to current local device
+                 train_state = torch.load(train_state_path, map_location=map_location)
+
+                 dataloader.sampler.load_state_dict(train_state["sampler"])
+                 best_loss = train_state["best_loss"]
+                 # Important: Set the starting epoch for the training loop
+                 start_epoch = train_state.get("epoch", -1) + 1 # Resume AFTER the saved epoch
+
+                 print(f"Rank {rank}: Loaded train_state (sampler, best_loss={best_loss:.4f}, start_epoch={start_epoch}) from {train_state_path}")
+            else:
+                 print(f"Rank {rank}: Warning - train_state.pt not found in checkpoint directory {latest_checkpoint_path}. Starting from epoch 0.")
+
+
+            timer.report(f"Rank {rank}: Completed loading checkpoint")
+        else:
+             print(f"Rank {rank}: No checkpoint found at {latest_checkpoint_path}. Starting training from scratch.")
+
+    except KeyError:
+        print("Rank {rank}: CHECKPOINT_ARTIFACT_PATH env var not set. Starting training from scratch.")
+    except Exception as e:
+        print(f"Rank {rank}: Error loading checkpoint: {e}. Starting training from scratch.")
+
+    # Ensure all ranks have finished loading before starting training
+    dist.barrier()
+    # --- End Checkpoint Loading Logic ---
+    """
+
+    # --- Training Loop (Modified Start Epoch) ---
     num_epochs = 30
     save_every_steps = 30
     model.train()
     # print("-------DATALOADER.SAMPLER.EPOCH-------", dataloader.sampler.epoch)
+
     for epoch in range(dataloader.sampler.epoch, num_epochs):
 
         dataloader.sampler.set_epoch(epoch)
