@@ -113,14 +113,16 @@ if __name__ == "__main__":
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
 
     # prepare dataset and utilities
-    dataset = load_dataset("wiki_qa", split="train")
+    # dataset = load_dataset("wiki_qa", split="train")
+    dataset = load_dataset("bespokelabs/bespoke-manim", split="train")
 
     def preprocess_function(examples):
         # Combine question and answer into a single text
         # question -> question
         # answer - python_code
         texts = [f"Question: {q}\nAnswer: {a}" for q, a in zip(examples['question'], examples['python_code'])]
-        
+        print("-------TEXTS-------", texts)
+        print("-" * 50)
         # Tokenize with padding and truncation
         encodings = tokenizer(
             texts,
