@@ -51,10 +51,12 @@
                 "--node_rank=0",
                 "--master_addr=localhost",
                 "--master_port=29500",
-                "/root/isc-demos/deepseek/gpo.py",
+                "/root/isc-demos/deepseek/grpo.py",
                 "--dataset-id", "255087c3-046c-421c-8fe3-6e333f14892a"
             ],
-            "env": {},
+            "env": {
+                "CHECKPOINT_ARTIFACT_PATH": "/root/isc-demos/deepseek/checkpoints"
+            },
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/deepseek",
             "justMyCode": false
