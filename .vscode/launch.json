@@ -1,0 +1,56 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TorchRun Distributed (8 GPUs)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "torch.distributed.run",
+            "args": [
+                "--nproc-per-node=1",
+                "--nnodes=1",
+                "--node_rank=0",
+                "--master_addr=localhost",
+                "--master_port=29500",
+                "/root/isc-demos/deepseek/fsdp_start_from_checkpoint.py",
+                "--dataset-id", "255087c3-046c-421c-8fe3-6e333f14892a"
+            ],
+            "env": {},
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/deepseek",
+            "justMyCode": false
+        },
+        {
+            "name": "Collate Weights",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/deepseek/collate_weights.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/deepseek",
+            "justMyCode": false,
+            "args": [],
+        },
+        {
+            "name": "Consolidated Inference",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/deepseek/consolidated_inference.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/deepseek",
+            "justMyCode": false,
+            "args": [],
+        }
+    ]
+}
+
+// isc_project_id = "4994c98d-ef58-49d9-8c94-4b46908fe10c"
+// experiment_name = "deepseek-r1-llama-8b"
+// gpus = 8
+// compute_mode = "cycle"
+// dataset_id_list = ["255087c3-046c-421c-8fe3-6e333f14892a"]
+// command = '''
+// source /root/.deepseek/bin/activate && 
+//   torchrun --nnodes=$NNODES --nproc-per-node=$N_PROC 
+//   --master_addr=$MASTER_ADDR --master_port=$MASTER_PORT --node_rank=$RANK 
+//   /root/isc-demos/deepseek/fsdp_start_from_checkpoint.py 
+//   --dataset-id 255087c3-046c-421c-8fe3-6e333f14892a'''
