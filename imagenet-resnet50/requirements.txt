@@ -1,0 +1,5 @@
+torch==2.4.1
+torchvision==0.19.1
+tensorboard==2.17.1
+pycocotools==2.0.8
+cycling_utils @ git+https://github.com/StrongResearch/cycling_utils.git
