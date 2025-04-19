@@ -115,7 +115,7 @@ if __name__ == "__main__":
     # prepare dataset and utilities
     # dataset = load_dataset("wiki_qa", split="train")
     dataset = load_dataset("bespokelabs/bespoke-manim", split="train")
-
+    # print("-------LEN DATASET-------", len(dataset))
     def preprocess_function(examples):
         # Combine question and answer into a single text
         # question -> question
@@ -163,7 +163,7 @@ if __name__ == "__main__":
         sampler=train_sampler
     )
     steps_per_epoch = len(dataloader)
-
+    # print("-------STEPS PER EPOCH-------", steps_per_epoch)
     best_loss = float("inf")
 
     # load checkpoint if found
@@ -190,10 +190,10 @@ if __name__ == "__main__":
     state_dict = { "app": AppState(model, optimizer) }
 
     # training
-    num_epochs = 10
+    num_epochs = 30
     save_every_steps = 30
     model.train()
-
+    # print("-------DATALOADER.SAMPLER.EPOCH-------", dataloader.sampler.epoch)
     for epoch in range(dataloader.sampler.epoch, num_epochs):
 
         dataloader.sampler.set_epoch(epoch)
