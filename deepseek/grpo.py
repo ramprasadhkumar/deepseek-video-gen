@@ -43,7 +43,12 @@ def get_sequence_embeddings(model, input_ids, attention_mask):
     # or accessing the underlying module if output_hidden_states=True doesn't work directly.
     # This is a potential point of failure depending on FSDP/Transformer versions.
     try:
-        outputs = model(input_ids=input_ids, attention_mask=attention_mask, output_hidden_states=True)
+        # Access the original module
+        if hasattr(model, 'module'):
+            unwrapped_model = model.module
+        else:
+            unwrapped_model = model
+        outputs = unwrapped_model(input_ids=input_ids, attention_mask=attention_mask, output_hidden_states=True)
         last_hidden_state = outputs.hidden_states[-1] # Shape: (batch_size, seq_len, hidden_dim)
     except TypeError as e:
          # Fallback if output_hidden_states isn't directly supported or causes issues with FSDP's wrapper
@@ -260,7 +265,6 @@ if __name__ == "__main__":
     )
 
     model = LoraModel(model, lora_config, ADAPTER_NAME)
-    model.print_trainable_parameters() # From LoraModel
 
     timer.report(f"PEFT model: {count_trainable_parameters(model)}")
 
@@ -290,7 +294,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
 
     # --- Dataset Preparation (Modified for GRPO) ---
-    dataset = load_dataset("bespokelabs/bespoke-manim", split="train")
+    dataset = load_dataset("bespokelabs/bespoke-manim", split="train")[:10]
 
     # Simple check for required columns
     if 'question' not in dataset.column_names or 'python_code' not in dataset.column_names:
@@ -402,7 +406,8 @@ if __name__ == "__main__":
 
     # load checkpoint if found
     try:
-        output_directory = os.environ["CHECKPOINT_ARTIFACT_PATH"]
+        # output_directory = os.environ["CHECKPOINT_ARTIFACT_PATH"]
+        output_directory = os.environ.get("CHECKPOINT_ARTIFACT_PATH", "/shared/artifacts/karthik-local-artifact-path")
     except KeyError as error:
         print("Must set env var CHECKPOINT_ARTIFACT_PATH so we know where to save checkpoints!")
         exit(1)

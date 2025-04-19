@@ -75,15 +75,16 @@ model = model.to("cuda")
 # dcp.load(state_dict=state_dict, checkpoint_id="/shared/artifacts/beee0cb6-bd5a-4d4e-8ef9-5c1575e2bf8c/checkpoints/AtomicDirectory_checkpoint_10_consolidated_lora_backup") ## UPDATE WITH PATH TO CHECKPOINT DIRECTORY
 
 # prompt = "What is the coefficient of $x^2y^6$ in the expansion of $\left(\frac{3}{5}x-\frac{y}{2}\right)^8$? Express your answer as a common fraction."
-prompt = "How does the Sieve of Eratosthenes evolve when extended to a 2D grid of numbers instead of a linear sequence? Give the python code to generate animation of this using python library manim"
+prompt = "How does the Sieve of Eratosthenes evolve when extended to a 2D grid of numbers instead of a linear sequence? Give the python code to generate animation of this using python library manim as answer"
 
 # # https://arxiv.org/abs/2501.12948
-deepseek_r1_input = f'''
-A conversation between User and Assistant. The user asks a question, and the Assistant solves it.
-The assistant first thinks about the reasoning process in the mind and then provides the user
-with the answer. The reasoning process and answer are enclosed within <think> </think> and
-<answer> </answer> tags, respectively, i.e., <think> reasoning process here </think>
-<answer> answer here </answer>. User: {prompt}. Assistant:'''
+# deepseek_r1_input = f'''
+# A conversation between User and Assistant. The user asks a question, and the Assistant solves it.
+# The assistant first thinks about the reasoning process in the mind and then provides the user
+# with the answer. The reasoning process and answer are enclosed within <think> </think> and
+# <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think>
+# <answer> answer here </answer>. User: {prompt}. Assistant:'''
+deepseek_r1_input = f"Question: {prompt}\nAnswer: "
 
 # deepseek_r1_input = "How does the Sieve of Eratosthenes evolve when extended to a 2D grid of numbers instead of a linear sequence? Give the python code to implement this in python library manim"
 

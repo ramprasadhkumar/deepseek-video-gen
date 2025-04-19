@@ -190,8 +190,8 @@ if __name__ == "__main__":
     state_dict = { "app": AppState(model, optimizer) }
 
     # training
-    num_epochs = 30
-    save_every_steps = 30
+    num_epochs = 100
+    save_every_steps = 50
     model.train()
     # print("-------DATALOADER.SAMPLER.EPOCH-------", dataloader.sampler.epoch)
     for epoch in range(dataloader.sampler.epoch, num_epochs):
