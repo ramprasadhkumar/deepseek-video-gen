@@ -121,8 +121,8 @@ if __name__ == "__main__":
         # question -> question
         # answer - python_code
         texts = [f"Question: {q}\nAnswer: {a}" for q, a in zip(examples['question'], examples['python_code'])]
-        print("-------TEXTS-------", texts)
-        print("-" * 50)
+        # print("-------TEXTS-------", texts)
+        # print("-" * 50)
         # Tokenize with padding and truncation
         encodings = tokenizer(
             texts,
