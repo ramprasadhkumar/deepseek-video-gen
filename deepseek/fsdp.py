@@ -117,7 +117,9 @@ if __name__ == "__main__":
 
     def preprocess_function(examples):
         # Combine question and answer into a single text
-        texts = [f"Question: {q}\nAnswer: {a}" for q, a in zip(examples['question'], examples['answer'])]
+        # question -> question
+        # answer - python_code
+        texts = [f"Question: {q}\nAnswer: {a}" for q, a in zip(examples['question'], examples['python_code'])]
         
         # Tokenize with padding and truncation
         encodings = tokenizer(
