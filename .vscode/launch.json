@@ -60,6 +60,19 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/deepseek",
             "justMyCode": false
+        },
+        {
+            "name": "TorchRun Single GRPO",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/deepseek/single_gpu_grpo.py",
+            "args": [],
+            "env": {
+                "CHECKPOINT_ARTIFACT_PATH": "/root/isc-demos/deepseek/checkpoints"
+            },
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/deepseek",
+            "justMyCode": false
         }
     ]
 }
