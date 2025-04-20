@@ -2,6 +2,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import LoraModel, LoraConfig, PeftConfig, PeftModel
+import os
 
 # Model IDs dictionary for different DeepSeek models
 model_weight_ids = {
@@ -19,9 +20,9 @@ mounted_dataset_path = f"/data/{model_weight_ids[MODEL_NAME]}"
 
 # Path to the checkpoint saved during GRPO training
 # Path to the saved checkpoint from single_gpu_grpo.py training
-CHECKPOINT_PATH = "/shared/grpo_checkpoints/grpo_checkpoint_step_50.pt"
+CHECKPOINT_PATH = "/shared/grpo_checkpoints/grpo_checkpoint_step_50_dir"
 # CHECKPOINT_PATH = "/shared/grpo_checkpoints/grpo_checkpoint_step_50"  # Update this!
-
+mounted_dataset_path = CHECKPOINT_PATH
 print(f"Loading base model from {mounted_dataset_path}")
 # Load tokenizer from the base model
 tokenizer = AutoTokenizer.from_pretrained(mounted_dataset_path)
@@ -36,14 +37,29 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map="auto"  # Automatically determine the best device mapping
 )
 
-print(f"Loading checkpoint from {CHECKPOINT_PATH}")
-# Load the trained model using the PeftModel.from_pretrained method
-# This is much simpler than manual state_dict mapping
-model = PeftModel.from_pretrained(
-    model,                  # Base model
-    CHECKPOINT_PATH,        # Path to the saved checkpoint
-    is_trainable=False      # Set to False for inference
-)
+# print(f"Loading checkpoint from {CHECKPOINT_PATH}")
+# # Load the trained model using the PeftModel.from_pretrained method
+# # This is much simpler than manual state_dict mapping
+# if os.path.exists(CHECKPOINT_PATH):
+# # Load the full checkpoint which contains model weights
+#     checkpoint = torch.load(CHECKPOINT_PATH)
+#     # Get the state dict from the checkpoint
+#     if "model_state_dict" in checkpoint:
+#         state_dict = checkpoint["model_state_dict"]
+#     elif "state_dict" in checkpoint:
+#         state_dict = checkpoint["state_dict"] 
+#     else:
+#         raise ValueError("Could not find model weights in checkpoint")
+
+#     # Load the weights into the model
+#     model.load_state_dict(state_dict)
+#     print("Successfully loaded model weights from checkpoint")
+# else:
+#     model = PeftModel.from_pretrained(
+#         model,                  # Base model
+#         CHECKPOINT_PATH,        # Path to the saved checkpoint
+#         is_trainable=False      # Set to False for inference
+#     )
 
 # Move model to GPU for inference
 model = model.to("cuda")
