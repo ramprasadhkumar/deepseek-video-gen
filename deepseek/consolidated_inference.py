@@ -75,7 +75,8 @@ model = model.to("cuda")
 # dcp.load(state_dict=state_dict, checkpoint_id="/shared/artifacts/beee0cb6-bd5a-4d4e-8ef9-5c1575e2bf8c/checkpoints/AtomicDirectory_checkpoint_10_consolidated_lora_backup") ## UPDATE WITH PATH TO CHECKPOINT DIRECTORY
 
 # prompt = "What is the coefficient of $x^2y^6$ in the expansion of $\left(\frac{3}{5}x-\frac{y}{2}\right)^8$? Express your answer as a common fraction."
-prompt = "How does the Sieve of Eratosthenes evolve when extended to a 2D grid of numbers instead of a linear sequence? Give the python code to generate animation of this using python library manim as answer"
+# prompt = "How does the Sieve of Eratosthenes evolve when extended to a 2D grid of numbers instead of a linear sequence? Give the python code to generate animation of this using python library manim as answer"
+prompt = "Using Manim standard library, write Python code to visually demonstrate the Pythagorean Theorem on a right triangle with sides 5, 12, 13. Include squares on each side of the triangle to show a² + b² = c², and add explanatory text for each step. Output only the Python code with comments"
 
 # # https://arxiv.org/abs/2501.12948
 # deepseek_r1_input = f'''

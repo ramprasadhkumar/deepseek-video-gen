@@ -41,6 +41,16 @@
             "args": [],
         },
         {
+            "name": "Consolidated Inference - GRPO",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/deepseek/consolidate_inference_grpo.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/deepseek",
+            "justMyCode": false,
+            "args": [],
+        },
+        {
             "name": "TorchRun Distributed: GRPO",
             "type": "debugpy",
             "request": "launch",
