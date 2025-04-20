@@ -39,7 +39,7 @@ lora_config = LoraConfig(
 )
 model = LoraModel(model, lora_config, ADAPTER_NAME)
 
-use_lora_adapter = False
+use_lora_adapter = True
 
 if use_lora_adapter:
     # # Load consolidated adapter weights
